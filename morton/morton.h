@@ -34,8 +34,8 @@ unsigned int interleave3(unsigned short u) {
     unsigned int x = u;
     x = (x | (x << 16)) & 0xff0000ff;
     x = (x | (x << 8 )) & 0x0f00f00f;
-    x = (x | (x << 4 )) & 0xc3c3c3c3;
-    x = (x | (x << 2 )) & 0x99999999;
+    x = (x | (x << 4 )) & 0xc30c30c3;
+    x = (x | (x << 2 )) & 0x49249249;
     return x;
 }
 
