@@ -103,11 +103,12 @@ template <typename T>
 T ImConfig::get(const char * name, T default_) {
     const char * str = getText(name);
     T v;
-    if (str)
+    if (str) {
         v = type<T>::fromString(str);
-    else
+    } else {
         v = default_;
-    set(name, v);
+        set(name, v);
+    }
     return v;
 }
 
