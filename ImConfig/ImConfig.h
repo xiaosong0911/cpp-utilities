@@ -33,6 +33,7 @@ private:
     XMLText * getTextNode(const char * name); // get TextNode for name, null if not exists
     const char * getText(const char * name); // get text of name, null if not exists
     void setText(const char * name, const char * text); // set the value of name, create if not exists
+    std::string eval(std::string str); // perform substitution on {}
 };
 
 /* ========== traits of some type ========== */
@@ -101,11 +102,14 @@ T ImConfig::get(const char * name) {
 
 template <typename T>
 T ImConfig::get(const char * name, T default_) {
-    const char * str = getText(name);
+    const char * text = getText(name);
+    std::string str = text ? text : "";
+    str = eval(str);
     T v;
-    if (str) {
-        v = type<T>::fromString(str);
+    if (str != "") {
+        v = type<T>::fromString(str.c_str());
     } else {
+        fprintf(stderr, "WARNING: imconfig: %s does not exist, using default value.\n", name);
         v = default_;
         set(name, v);
     }

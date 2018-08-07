@@ -35,8 +35,7 @@ XMLText * ImConfig::getTextNode(const char * name) {
 const char * ImConfig::getText(const char * name) {
     XMLText* t = getTextNode(name);
     if (!t) return nullptr;
-    const char * str = t->Value();
-    return str;
+    return t->Value();
 }
 
 void ImConfig::setText(const char * name, const char * text) {
@@ -49,6 +48,20 @@ void ImConfig::setText(const char * name, const char * text) {
         config->InsertEndChild(node);
         node->InsertEndChild(NewText(text));
     }
+}
+
+std::string ImConfig::eval(std::string str) {
+    // substitute {} quotation
+    for (;;) {
+        size_t start = str.find('{');
+        size_t end = str.find('}');
+        if (start == std::string::npos) break;
+        if (end == std::string::npos) break;
+
+        std::string tag = str.substr(start + 1, end - start - 1);
+        str.replace(start, end + 1 - start, getText(tag.c_str()));
+    }
+    return str;
 }
 
 }
