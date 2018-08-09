@@ -1,4 +1,5 @@
 #include "ImConfig.h"
+#include "../bc/bc.h"
 
 namespace ImConfig {
 
@@ -60,6 +61,21 @@ std::string ImConfig::eval(std::string str) {
 
         std::string tag = str.substr(start + 1, end - start - 1);
         str.replace(start, end + 1 - start, getText(tag.c_str()));
+    }
+    // evaluate [] quotation
+    for (;;) {
+        size_t start = str.find('[');
+        size_t end = str.find(']');
+        if (start == std::string::npos) break;
+        if (end == std::string::npos) break;
+
+        std::string tag = str.substr(start + 1, end - start - 1);
+        double r;
+        char buffer[64] = "";
+        if (bc::eval(tag.c_str(), r)) {
+            sprintf(buffer, "%lg", r);
+        }
+        str.replace(start, end + 1 - start, buffer);
     }
     return str;
 }
