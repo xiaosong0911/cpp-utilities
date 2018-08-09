@@ -2,6 +2,7 @@
 
 #include <glm/glm.hpp>
 
+
 /* compatible with cuda */
 #ifdef __NVCC__
 #define FUNCTION_HEADER __host__ __device__

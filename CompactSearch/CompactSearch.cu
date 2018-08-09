@@ -75,5 +75,5 @@ void CompactSearch::sort(const thrust::device_vector<glm::fvec3> & pos, int & pa
             ow
             );
     particleNumberInRange = cellOffset[cGrid.cellNumber()];
-    fprintf(stderr, "CompactSearch: %d particles in range\n", particleNumberInRange);
+    //fprintf(stderr, "CompactSearch: %d particles in range\n", particleNumberInRange);
 }
