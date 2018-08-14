@@ -1,7 +1,7 @@
 #pragma once
 
-#include <tinyxml2.h>
 #include <string>
+#include <map>
 
 namespace ImConfig {
 
@@ -15,10 +15,9 @@ struct type {
     static T fromString(const char * str);
 };
 
-using namespace tinyxml2;
-
 /* ========== ImConfig ========== */
-class ImConfig : XMLDocument {
+class ImConfig {
+    std::map<std::string, std::string> map;
 public:
     template <typename T>
     T get(const char * name);
@@ -26,12 +25,11 @@ public:
     T get(const char * name, T default_);
     template <typename T>
     void set(const char * name, T value);
+    void clear(const char * name);
     void loadFile(const char * filename);
     void saveFile(const char * filename);
 private:
-    XMLNode * rootNode(); // get config node, create if not exists
-    XMLText * getTextNode(const char * name); // get TextNode for name, null if not exists
-    const char * getText(const char * name); // get text of name, null if not exists
+    const char * getText(const char * name); // get text of name, empty string if not exists
     void setText(const char * name, const char * text); // set the value of name, create if not exists
     std::string eval(std::string str); // perform substitution on {}
 };
@@ -102,11 +100,10 @@ T ImConfig::get(const char * name) {
 
 template <typename T>
 T ImConfig::get(const char * name, T default_) {
-    const char * text = getText(name);
-    std::string str = text ? text : "";
-    str = eval(str);
     T v;
+    std::string str = getText(name);
     if (str != "") {
+        str = eval(str);
         v = type<T>::fromString(str.c_str());
     } else {
         fprintf(stderr, "WARNING: imconfig: %s does not exist, using default value.\n", name);
@@ -119,6 +116,11 @@ T ImConfig::get(const char * name, T default_) {
 template <typename T>
 void ImConfig::set(const char * name, T value) {
     setText(name, type<T>::toString(value).c_str());
+}
+
+inline void ImConfig::clear(const char * name) {
+    auto it = map.find(name);
+    if (it != map.end()) map.erase(it);
 }
 
 }

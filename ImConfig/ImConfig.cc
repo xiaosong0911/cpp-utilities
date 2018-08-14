@@ -1,54 +1,51 @@
 #include "ImConfig.h"
+#include <tinyxml2.h>
 #include "../bc/bc.h"
 
 namespace ImConfig {
 
+using namespace tinyxml2;
+
 void ImConfig::loadFile(const char * filename) {
-    LoadFile(filename);
+    XMLDocument doc;
+    doc.LoadFile(filename);
+    XMLElement * config = doc.FirstChildElement("config");
+    if (!config) return;
+    for (XMLElement * term = config->FirstChildElement();
+            term;
+            term = term->NextSiblingElement()) {
+        map[term->Name()] = term->GetText() ?  term->GetText() : "";
+    }
 }
 
 void ImConfig::saveFile(const char * filename) {
-    SaveFile(filename);
-}
-
-XMLNode * ImConfig::rootNode() {
-    XMLNode * n = FirstChildElement("config");
-    if (!n) {
-        n = NewElement("config");
-        InsertEndChild(n);
+    XMLDocument doc;
+    doc.LoadFile(filename);
+    XMLElement * config = doc.FirstChildElement("config");
+    if (!config) {
+        config = doc.NewElement("config");
+        doc.InsertEndChild(config);
     }
-    return n;
-}
-
-XMLText * ImConfig::getTextNode(const char * name) {
-    XMLHandle h = rootNode();
-    XMLElement * e = h.FirstChildElement(name).ToElement();
-    if (!e) return nullptr; // not exists
-    for (XMLNode * it = e->FirstChild(); it; it = it->NextSibling()) {
-        XMLText * t = it->ToText();
-        if (t) return t;
+    for (auto p : map) {
+        XMLElement * term = config->FirstChildElement(p.first.c_str());
+        if (!term) {
+            term = doc.NewElement(p.first.c_str());
+            term->SetText(p.second.c_str());
+            config->InsertEndChild(term);
+        }
     }
-    XMLText * t = NewText("");
-    e->InsertEndChild(t);
-    return t;
+    doc.SaveFile(filename);
 }
 
 const char * ImConfig::getText(const char * name) {
-    XMLText* t = getTextNode(name);
-    if (!t) return nullptr;
-    return t->Value();
+    if (map.count(name))
+        return map[name].c_str();
+    else
+        return "";
 }
 
 void ImConfig::setText(const char * name, const char * text) {
-    XMLText* t = getTextNode(name);
-    if (t) {
-        t->SetValue(text);
-    } else {
-        XMLElement * node = NewElement(name);
-        XMLNode * config = rootNode();
-        config->InsertEndChild(node);
-        node->InsertEndChild(NewText(text));
-    }
+    map[name] = std::string(text);
 }
 
 std::string ImConfig::eval(std::string str) {
@@ -60,7 +57,7 @@ std::string ImConfig::eval(std::string str) {
         if (end == std::string::npos) break;
 
         std::string tag = str.substr(start + 1, end - start - 1);
-        str.replace(start, end + 1 - start, getText(tag.c_str()));
+        str.replace(start, end + 1 - start, eval(getText(tag.c_str())));
     }
     // evaluate [] quotation
     for (;;) {
@@ -69,15 +66,14 @@ std::string ImConfig::eval(std::string str) {
         if (start == std::string::npos) break;
         if (end == std::string::npos) break;
 
-        std::string tag = str.substr(start + 1, end - start - 1);
+        std::string expr = str.substr(start + 1, end - start - 1);
         double r;
         char buffer[64] = "";
-        if (bc::eval(tag.c_str(), r)) {
+        if (bc::eval(expr.c_str(), r)) {
             sprintf(buffer, "%lg", r);
         }
         str.replace(start, end + 1 - start, buffer);
     }
     return str;
 }
-
 }
