@@ -8,6 +8,9 @@ class Logger {
 public:
     Logger () : logfile (stderr) {}
     Logger (const char * filename) {
+        setOutput(filename);
+    }
+    void setOutput(const char * filename) {
         logfile = fopen(filename, "w");
         if (!logfile) {
             logfile = stderr;
