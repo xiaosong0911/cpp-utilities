@@ -41,29 +41,29 @@ struct OffsetWriter {
 };
 }
 
-void CompactSearch::sort(const thrust::device_vector<glm::fvec3> & pos, int & particleNumberInRange) {
+void CompactSearch::sort(int particleNumber, const glm::fvec3 * d_pos, int & particleNumberInRange) {
     // calc cell id
-    thrust::device_vector<unsigned int> cellId(pos.size());
+    thrust::device_vector<unsigned int> cellId(particleNumber);
     thrust::transform(thrust::device,
-            pos.begin(), pos.end(),
+            d_pos, d_pos + particleNumber,
             cellId.begin(),
             CalcCellOp(cGrid)
             );
     // set pId from 0 to #particles - 1
     auto count_iter = thrust::make_counting_iterator(0);
-    particleId.resize(pos.size());
-    thrust::copy(thrust::device, count_iter, count_iter + pos.size(), particleId.begin());
+    particleId.resize(particleNumber);
+    thrust::copy(thrust::device, count_iter, count_iter + particleNumber, particleId.begin());
     // sort
     thrust::sort_by_key(thrust::device, cellId.begin(), cellId.end(), particleId.begin());
     // get the first particle for each cell
-    thrust::device_vector<int> index(pos.size());
+    thrust::device_vector<int> index(particleNumber);
     thrust::copy(thrust::device, count_iter, count_iter + index.size(), index.begin());
     auto end = thrust::unique_by_key(thrust::device, cellId.begin(), cellId.end(), index.begin());
     const int cellCount = end.first - cellId.begin();
     // write offset of each cell
     cellOffset.resize(cGrid.cellNumber() + 1);
     struct OffsetWriter ow;
-    ow.particleNumber = pos.size();
+    ow.particleNumber = particleNumber;
     ow.cellNumber = cGrid.cellNumber();
     ow.cellCount = cellCount;
     ow.cell = (int *) cellId.data().get();

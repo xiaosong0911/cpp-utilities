@@ -51,7 +51,8 @@ class CompactSearch {
     thrust::device_vector<int> particleId;
     thrust::device_vector<int> cellOffset;
 public:
-    void sort(const thrust::device_vector<glm::fvec3> & pos, int & particleNumberInRange);
+    void sort(int particleNumber, const glm::fvec3 * d_pos, int & particleNumberInRange);
+    void sort(const thrust::device_vector<glm::fvec3> pos, int & particleNumberInRange) {sort(pos.size(), pos.data().get(), particleNumberInRange);}
     template <typename T> void scatter(thrust::device_vector<T> & v);
     template <typename T> void gather(thrust::device_vector<T> & v);
     void setGrid(cartesian_grid3 cg) {cGrid = cg;}
