@@ -39,7 +39,6 @@ inline std::string join(const std::vector<std::string> & ss, const std::string &
 }
 
 inline int sprintf(std::string & str, const char * fmt, ...) {
-    // TODO
     for (;;) {
         va_list va;
         va_start(va, fmt);

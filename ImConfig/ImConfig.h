@@ -2,8 +2,13 @@
 
 #include <string>
 #include <map>
+#include <tinyxml2.h>
+
+#include "../string_helper.h"
 
 namespace ImConfig {
+
+using namespace tinyxml2;
 
 /* ========== type trait ========== */
 
@@ -13,25 +18,6 @@ struct type {
     static T default_value();
     static std::string toString(T value);
     static T fromString(const char * str);
-};
-
-/* ========== ImConfig ========== */
-class ImConfig {
-    std::map<std::string, std::string> map;
-public:
-    template <typename T>
-    T get(const char * name);
-    template <typename T>
-    T get(const char * name, T default_);
-    template <typename T>
-    void set(const char * name, T value);
-    void clear(const char * name);
-    void loadFile(const char * filename);
-    void saveFile(const char * filename);
-private:
-    const char * getText(const char * name); // get text of name, empty string if not exists
-    void setText(const char * name, const char * text); // set the value of name, create if not exists
-    std::string eval(std::string str); // perform substitution on {}
 };
 
 /* ========== traits of some type ========== */
@@ -53,8 +39,8 @@ template <>
 struct type<float> {
     static float default_value() {return 0;};
     static std::string toString(float value) {
-        char buf[32];
-        sprintf(buf, "%g", value);
+        std::string buf;
+        string_helper::sprintf(buf, "%g", value);
         return buf;
     }
     static float fromString(const char * str) {
@@ -68,8 +54,8 @@ template <>
 struct type<double> {
     static double default_value() {return 0;};
     static std::string toString(double value) {
-        char buf[32];
-        sprintf(buf, "%lg", value);
+        std::string buf;
+        string_helper::sprintf(buf, "%lg", value);
         return buf;
     }
     static double fromString(const char * str) {
@@ -91,6 +77,32 @@ struct type<std::string> {
     }
 };
 
+/* ========== ImConfig ========== */
+class ImConfig {
+    std::map<std::string, std::string> map;
+    XMLElement * autowrite;
+public:
+    ImConfig() : autowrite(nullptr) {}
+    ImConfig(XMLElement * e) {
+        autowrite = e;
+        ImConfig::loadXML(e);
+    }
+    template <typename T>
+    T get(const char * name);
+    template <typename T>
+    T get(const char * name, T default_);
+    template <typename T>
+    void set(const char * name, T value);
+    void clear(const char * name);
+    void loadXML(XMLElement * elem); // load all entries from XML
+    void saveXML(XMLElement * elem); // write new entries to XML
+    void setAutowriteOnDelete(XMLElement * e) { autowrite = e; }
+    ~ImConfig() { if (autowrite) saveXML(autowrite); }
+private:
+    const char * getText(const char * name); // get text of name, nullptr if not exists
+    void setText(const char * name, const char * text); // set the value of name, create if not exists
+};
+
 /* ========== class template implementation ========== */
 
 template <typename T>
@@ -101,10 +113,9 @@ T ImConfig::get(const char * name) {
 template <typename T>
 T ImConfig::get(const char * name, T default_) {
     T v;
-    std::string str = getText(name);
-    if (str != "") {
-        str = eval(str);
-        v = type<T>::fromString(str.c_str());
+    const char * str = getText(name);
+    if (str) {
+        v = type<T>::fromString(str);
     } else {
         fprintf(stderr, "WARNING: imconfig: %s does not exist, using default value.\n", name);
         v = default_;
@@ -118,9 +129,26 @@ void ImConfig::set(const char * name, T value) {
     setText(name, type<T>::toString(value).c_str());
 }
 
-inline void ImConfig::clear(const char * name) {
-    auto it = map.find(name);
-    if (it != map.end()) map.erase(it);
-}
+class ImConfigFactory {
+public:
+    ImConfigFactory(const char * fname) {
+        filename = fname;
+        doc.LoadFile(filename.c_str());
+    }
+    ~ImConfigFactory() {
+        doc.SaveFile(filename.c_str());
+    }
+    ImConfig createImConfig(const char * tag) {
+        XMLElement * e = doc.FirstChildElement(tag);
+        if (!e) {
+            e = doc.NewElement(tag);
+            doc.InsertEndChild(e);
+        }
+        return ImConfig(e);
+    }
+private:
+    std::string filename;
+    XMLDocument doc;
+};
 
 }
