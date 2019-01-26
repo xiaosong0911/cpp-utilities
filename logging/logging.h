@@ -13,6 +13,7 @@ void logging_init();
 void logging_finalize();
 
 void logging_setlevel(int level);
+const char * get_level_str(int level);
 
 void logging_printfln(int level, const char * fmt, ...);
 

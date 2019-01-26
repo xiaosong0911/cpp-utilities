@@ -21,7 +21,7 @@ void test() {
 
 int main() {
     logging_init();
-    // logging_setlevel(LOGGING_DEBUG);
+    logging_setlevel(LOGGING_DEBUG);
     test();
     logging_finalize();
 }

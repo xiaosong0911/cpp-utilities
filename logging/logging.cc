@@ -10,7 +10,7 @@
 static int logging_level = LOGGING_INFO;
 static FILE * logging_output_fp = NULL;
 
-static const char * get_level_str(int level) {
+const char * get_level_str(int level) {
     switch(level) {
         case LOGGING_DEBUG: return "DEBUG";
         case LOGGING_INFO: return "INFO";
@@ -45,8 +45,7 @@ static void set_level_from_env() {
     }
 }
 
-static const char * get_time_str() {
-    static char buffer[30] = "";
+static const char * get_time_str(char * buffer) {
     using std::chrono::system_clock;
     auto now = system_clock::now();
     auto fraction = now - std::chrono::time_point_cast<std::chrono::seconds>(now);
@@ -60,7 +59,8 @@ static const char * get_time_str() {
 
 static void logging_vfprintfln(FILE* fp, int level, const char * fmt, va_list vl) {
     // TODO time, headers
-    fprintf(fp, "[%s]", get_time_str());
+    char buffer[30];
+    fprintf(fp, "[%s]", get_time_str(buffer));
     fprintf(fp, "[%s] ", get_level_str(level));
     vfprintf(fp, fmt, vl);
     fprintf(fp, "\n");
