@@ -1,6 +1,5 @@
 add_subdirectory(ImConfig)
-add_subdirectory(morton)
-add_subdirectory(CompactSearch)
+add_subdirectory(VideoWriter)
 add_subdirectory(bc)
 add_subdirectory(logging)
-add_subdirectory(VideoWriter)
+add_subdirectory(morton)
