@@ -6,6 +6,10 @@
 
 #include "../string_helper.h"
 
+#ifndef errorfln
+#define errorfln(fmt, ...) fprintf(stderr, fmt "\n", __VA_ARGS__)
+#endif
+
 namespace ImConfig {
 
 using namespace tinyxml2;
@@ -117,7 +121,7 @@ T ImConfig::get(const char * name, T default_) {
     if (str) {
         v = type<T>::fromString(str);
     } else {
-        fprintf(stderr, "WARNING: imconfig: %s does not exist, using default value.\n", name);
+        errorfln("WARNING: imconfig: %s does not exist, using default value.", name);
         v = default_;
         set(name, v);
     }
