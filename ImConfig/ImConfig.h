@@ -135,16 +135,15 @@ public:
     ~ImConfigFactory() {
         doc.SaveFile(filename.c_str());
     }
+    XMLElement * getElement(const char * tag);
     ImConfig createImConfig(const char * tag) {
-
-        XMLElement * e = doc.FirstChildElement(tag);
-        if (!e) {
-            e = doc.NewElement(tag);
-            doc.InsertEndChild(e);
-        }
-        ImConfig ic;
-        loadXML(e, ic);
+        XMLElement * e = getElement(tag);
+        ImConfig ic; loadXML(e, ic);
         return ic;
+    }
+    void saveImConfig(const char * tag, ImConfig & ic) {
+        XMLElement * e = getElement(tag);
+        saveXML(e, ic);
     }
 private:
     std::string filename;

@@ -93,4 +93,13 @@ void ImConfigFactory::saveXML(XMLElement * elem, const ImConfig & ic) {
     }
 }
 
+XMLElement * ImConfigFactory::getElement(const char * tag) {
+    XMLElement * e = doc.FirstChildElement(tag);
+    if (!e) {
+        e = doc.NewElement(tag);
+        doc.InsertEndChild(e);
+    }
+    return e;
+}
+
 }
