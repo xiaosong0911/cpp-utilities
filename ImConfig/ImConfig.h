@@ -12,8 +12,6 @@
 
 namespace ImConfig {
 
-using namespace tinyxml2;
-
 /* ========== type trait ========== */
 
 template <typename T>
@@ -84,24 +82,16 @@ struct type<std::string> {
 /* ========== ImConfig ========== */
 class ImConfig {
     std::map<std::string, std::string> map;
-    XMLElement * autowrite;
 public:
-    ImConfig() : autowrite(nullptr) {}
-    ImConfig(XMLElement * e) {
-        autowrite = e;
-        ImConfig::loadXML(e);
-    }
     template <typename T>
     T get(const char * name);
     template <typename T>
     T get(const char * name, T default_);
     template <typename T>
     void set(const char * name, T value);
+    const std::map<std::string, std::string> & getMap() const { return map; }
+    void modMap(const std::map<std::string, std::string> & m) { map = m; }
     void clear(const char * name);
-    void loadXML(XMLElement * elem); // load all entries from XML
-    void saveXML(XMLElement * elem); // write new entries to XML
-    void setAutowriteOnDelete(XMLElement * e) { autowrite = e; }
-    ~ImConfig() { if (autowrite) saveXML(autowrite); }
 private:
     const char * getText(const char * name); // get text of name, nullptr if not exists
     void setText(const char * name, const char * text); // set the value of name, create if not exists
@@ -133,8 +123,11 @@ void ImConfig::set(const char * name, T value) {
     setText(name, type<T>::toString(value).c_str());
 }
 
+using namespace tinyxml2;
 class ImConfigFactory {
 public:
+    static void loadXML(XMLElement * elem, ImConfig & im); // load all entries from XML
+    static void saveXML(XMLElement * elem, const ImConfig & im); // write new entries to XML
     ImConfigFactory(const char * fname) {
         filename = fname;
         doc.LoadFile(filename.c_str());
@@ -143,12 +136,15 @@ public:
         doc.SaveFile(filename.c_str());
     }
     ImConfig createImConfig(const char * tag) {
+
         XMLElement * e = doc.FirstChildElement(tag);
         if (!e) {
             e = doc.NewElement(tag);
             doc.InsertEndChild(e);
         }
-        return ImConfig(e);
+        ImConfig ic;
+        loadXML(e, ic);
+        return ic;
     }
 private:
     std::string filename;
