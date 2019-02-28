@@ -1,8 +1,11 @@
 #include "VideoWriter.h"
-#include <math.h>
+
 #include <vector>
-#ifdef USE_OPENGL
-#include <GL/gl.h>
+#include <math.h>
+
+#ifdef _MSC_VER
+#define popen _popen
+#define pclose _pclose
 #endif
 
 VideoWriter::VideoWriter() : VideoWriter("output.mp4", 24) {}
@@ -49,12 +52,3 @@ void VideoWriter::writeFrameRGB(int w, int h, float * buf) {
     writeFrameRGB(w, h, pixels.data());
 }
 
-#ifdef USE_OPENGL
-void VideoWriter::writeFrameGL(int w, int h) {
-    std::vector<unsigned char> buf(w * h * 3);
-    glPixelStorei(GL_PACK_ALIGNMENT, 1);
-    glReadBuffer(GL_FRONT);
-    glReadPixels(0, 0, w, h, GL_RGB, GL_UNSIGNED_BYTE, buf.data());
-    writeFrameRGB(w, h, buf.data());
-}
-#endif
