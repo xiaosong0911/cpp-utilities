@@ -11,16 +11,16 @@
 VideoWriter::VideoWriter() : VideoWriter("output.mp4", 24) {}
 
 VideoWriter::VideoWriter(const char * filename, int framerate) : frame(0) {
-    char cmd[256];
+    char cmd[512];
     sprintf(cmd,
             "ffmpeg -y "
             "-loglevel error "
-            "-framerate %d -format image2pipe -i - "
+            "-framerate %d -f image2pipe -i - "
             "-vf format=yuv420p "
             "-movflags faststart "
-            "\'%s\'",
+            "\"%s\"",
             framerate, filename);
-    fp = popen(cmd, "w");
+    fp = popen(cmd, "wb");
 }
 
 VideoWriter::~VideoWriter() {
@@ -40,7 +40,7 @@ void VideoWriter::writeFrameRGB(int w, int h, unsigned char * buf) {
     fprintf(fp, "%d %d\n", w, h);
     fprintf(fp, "255\n");
     for (int y = h-1; y >= 0; y--)
-        fwrite(&buf[y * w * 3], 3 * sizeof(unsigned char), w, fp);
+        fwrite(&buf[y * w * 3], 3, w, fp);
     fflush(fp);
     frame++;
 }
