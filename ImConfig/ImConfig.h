@@ -2,6 +2,7 @@
 
 #include <string>
 #include <map>
+#include <functional>
 #include <tinyxml2.h>
 
 #include "../string_helper.h"
@@ -82,7 +83,10 @@ struct type<std::string> {
 /* ========== ImConfig ========== */
 class ImConfig {
     std::map<std::string, std::string> map;
+    std::function<void(const ImConfig &)> cb;
 public:
+    ~ImConfig() { if (cb) cb(*this); }
+    void setCB(std::function<void(const ImConfig &)>f) { cb = f; }
     template <typename T>
     T get(const char * name);
     template <typename T>
@@ -136,15 +140,8 @@ public:
         doc.SaveFile(filename.c_str());
     }
     XMLElement * getElement(const char * tag);
-    ImConfig createImConfig(const char * tag) {
-        XMLElement * e = getElement(tag);
-        ImConfig ic; loadXML(e, ic);
-        return ic;
-    }
-    void saveImConfig(const char * tag, ImConfig & ic) {
-        XMLElement * e = getElement(tag);
-        saveXML(e, ic);
-    }
+    // only new value will be wrote back
+    ImConfig createImConfig(const char * tag);
 private:
     std::string filename;
     XMLDocument doc;

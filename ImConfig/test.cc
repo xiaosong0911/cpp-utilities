@@ -2,7 +2,7 @@
 
 int main() {
     ImConfig::ImConfigFactory icf("config.xml");
-    ImConfig::ImConfig ic = icf.createImConfig("config");
+    ImConfig::ImConfig ic = icf.createImConfig("demo");
 
     printf("int: %d\n", ic.get<int>("int-demo"));
     printf("float: %g\n", ic.get<float>("float-demo"));
