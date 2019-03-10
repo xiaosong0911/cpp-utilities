@@ -3,6 +3,8 @@
 #include <vector>
 #include <math.h>
 
+#include <assert.h>
+
 #ifdef _MSC_VER
 #define popen _popen
 #define pclose _pclose
@@ -20,7 +22,12 @@ VideoWriter::VideoWriter(const char * filename, int framerate) : frame(0) {
             "-movflags faststart "
             "\"%s\"",
             framerate, filename);
+#ifdef _MSC_VER
     fp = popen(cmd, "wb");
+#else
+    fp = popen(cmd, "w");
+#endif
+    assert(fp);
 }
 
 VideoWriter::~VideoWriter() {
@@ -51,4 +58,3 @@ void VideoWriter::writeFrameRGB(int w, int h, float * buf) {
         pixels[i] = uchar_of_float(buf[i]);
     writeFrameRGB(w, h, pixels.data());
 }
-
