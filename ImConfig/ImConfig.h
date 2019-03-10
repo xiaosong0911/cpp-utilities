@@ -131,7 +131,7 @@ using namespace tinyxml2;
 class ImConfigFactory {
 public:
     static void loadXML(XMLElement * elem, ImConfig & im); // load all entries from XML
-    static void saveXML(XMLElement * elem, const ImConfig & im); // write new entries to XML
+    static void saveXML(XMLElement * elem, const ImConfig & im, bool overwrite = false); // write new entries to XML
     ImConfigFactory(const char * fname) {
         filename = fname;
         doc.LoadFile(filename.c_str());
@@ -141,7 +141,7 @@ public:
     }
     XMLElement * getElement(const char * tag);
     // only new value will be wrote back
-    ImConfig createImConfig(const char * tag, bool write_back = true);
+    ImConfig createImConfig(const char * tag, bool overwrite = false);
 private:
     std::string filename;
     XMLDocument doc;

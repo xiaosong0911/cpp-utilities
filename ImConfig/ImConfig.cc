@@ -80,16 +80,17 @@ void ImConfigFactory::loadXML(XMLElement * elem, ImConfig & ic) {
     ic.modMap(map);
 }
 
-void ImConfigFactory::saveXML(XMLElement * elem, const ImConfig & ic) {
+void ImConfigFactory::saveXML(XMLElement * elem, const ImConfig & ic, bool overwrite) {
     if (!elem) return;
     std::map<std::string, std::string> map = ic.getMap();
     for (auto p : map) {
         XMLElement * term = elem->FirstChildElement(p.first.c_str());
         if (!term) {
             term = elem->GetDocument()->NewElement(p.first.c_str());
-            term->SetText(p.second.c_str());
+            if (!overwrite) term->SetText(p.second.c_str());
             elem->InsertEndChild(term);
         }
+        if (overwrite) term->SetText(p.second.c_str());
     }
 }
 
@@ -102,12 +103,12 @@ XMLElement * ImConfigFactory::getElement(const char * tag) {
     return e;
 }
 
-ImConfig ImConfigFactory::createImConfig(const char * tag, bool write_back) {
+ImConfig ImConfigFactory::createImConfig(const char * tag, bool overwrite) {
     XMLElement * e = getElement(tag);
-    ImConfig ic; loadXML(e, ic);
-    if (write_back)
-        ic.setCB([=](const ImConfig & ic) {
-        saveXML(e, ic);
+    ImConfig ic;
+    loadXML(e, ic);
+    ic.setCB([=](const ImConfig &ic) {
+        saveXML(e, ic, overwrite);
     });
     return ic;
 }
