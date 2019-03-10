@@ -141,7 +141,7 @@ public:
     }
     XMLElement * getElement(const char * tag);
     // only new value will be wrote back
-    ImConfig createImConfig(const char * tag);
+    ImConfig createImConfig(const char * tag, bool write_back = true);
 private:
     std::string filename;
     XMLDocument doc;

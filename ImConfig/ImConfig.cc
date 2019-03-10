@@ -102,10 +102,11 @@ XMLElement * ImConfigFactory::getElement(const char * tag) {
     return e;
 }
 
-ImConfig ImConfigFactory::createImConfig(const char * tag) {
+ImConfig ImConfigFactory::createImConfig(const char * tag, bool write_back) {
     XMLElement * e = getElement(tag);
     ImConfig ic; loadXML(e, ic);
-    ic.setCB([=](const ImConfig & ic) {
+    if (write_back)
+        ic.setCB([=](const ImConfig & ic) {
         saveXML(e, ic);
     });
     return ic;
