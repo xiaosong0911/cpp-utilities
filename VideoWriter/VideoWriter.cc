@@ -52,6 +52,17 @@ void VideoWriter::writeFrameRGB(int w, int h, unsigned char * buf) {
     frame++;
 }
 
+void VideoWriter::writeFrameRGBA(int w, int h, unsigned char * buf) {
+    fprintf(fp, "P6\n");
+    fprintf(fp, "%d %d\n", w, h);
+    fprintf(fp, "255\n");
+    for (int y = h-1; y >= 0; y--)
+        for (int x = 0; x < w; x++)
+            fwrite(&buf[(y * w + x) * 4], 3, 1, fp);
+    fflush(fp);
+    frame++;
+}
+
 void VideoWriter::writeFrameRGB(int w, int h, float * buf) {
     std::vector<unsigned char> pixels(w * h * 3);
     for (int i = 0; i < w * h * 3; i++)

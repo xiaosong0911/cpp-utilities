@@ -9,6 +9,7 @@ public:
     ~VideoWriter();
     void writeFrameRGB(int w, int h, float * p);
     void writeFrameRGB(int w, int h, unsigned char * p);
+    void writeFrameRGBA(int w, int h, unsigned char * p);
     int getFrame() { return frame; }
 private:
     int frame;
