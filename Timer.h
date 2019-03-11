@@ -38,8 +38,8 @@ struct scoped_timer_logger {
         t.reset();
     }
     ~scoped_timer_logger() {
-        infofln("[timing] %s for %lg ms", tag, t.duration_in_seconds() * 100);
+        infofln("[timing] %s for %lg ms", tag, t.duration_in_seconds() * 1000);
     }
 };
 
-#define TIME_SCOPE(tag) scoped_timer_logger __l##__LINE__ (tag);
+#define TIME_SCOPE(tag) scoped_timer_logger __sl(tag)
