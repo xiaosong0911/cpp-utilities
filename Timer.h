@@ -28,7 +28,7 @@ private:
 
 #ifndef infofln
 #define infofln(fmt, ...) fprintf(stderr, fmt"\n", __VA_ARGS__)
-#endif infofln
+#endif
 
 struct scoped_timer_logger {
     const char * tag;
