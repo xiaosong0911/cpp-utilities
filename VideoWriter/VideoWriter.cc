@@ -56,9 +56,14 @@ void VideoWriter::writeFrameRGBA(int w, int h, unsigned char * buf) {
     fprintf(fp, "P6\n");
     fprintf(fp, "%d %d\n", w, h);
     fprintf(fp, "255\n");
-    for (int y = h-1; y >= 0; y--)
-        for (int x = 0; x < w; x++)
-            fwrite(&buf[(y * w + x) * 4], 3, 1, fp);
+    std::vector<unsigned char> buffer(w * h * 3);
+    unsigned char * ptr = &buffer[0];
+    for (int y = h - 1; y >= 0; y--)
+        for (int x = 0; x < w; x++) {
+            memcpy(ptr, &buf[(y * w + x) * 4], 3);
+            ptr += 3;
+        }
+    fwrite(&buffer[0], 3, w *h, fp);
     fflush(fp);
     frame++;
 }
