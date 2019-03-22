@@ -2,7 +2,7 @@
 
 #include <vector>
 #include <math.h>
-
+#include <string.h>
 #include <assert.h>
 
 #ifdef _MSC_VER
